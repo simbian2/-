@@ -1,11 +1,11 @@
 const express = require('express');
 const cookieParser = require('cookie-parser'); //npm install cookie-parser
 const bodyParser = require('body-parser'); // npm install body-parser
-const token = require('./createtoken'); // 외부 js파일 가져오기
 const app = express();
 const nunjucks = require('nunjucks');
 const ctoken = require('./jwt');
 const auth = require('./middleware/auth');
+const {User} = require('../jwt/models/index')
 
 app.set('view engine','html');
 nunjucks.configure('views',{
@@ -32,12 +32,17 @@ app.get('/menu1',(req,res)=>{ //sub 페이지
 })
 
 //POST auth/local/login
-app.post('/auth/local/login',(req,res)=>{
+app.post('/auth/local/login', async (req,res)=>{
     let {userid,userpw} = req.body;
     console.log('body req : ',userid,userpw);
+
     let result = {};
-    // DB 접속후 결과 Return 
-    if(userid=='root' && userpw=='root'){
+
+    let flag = await User.findOne({ 
+        where:{ userid:userid, userpw:userpw }
+    }) 
+
+    if(flag != undefined){
         // 로그인 성공
         result = {
             result:true,
@@ -56,22 +61,6 @@ app.post('/auth/local/login',(req,res)=>{
         }
     }
     res.json(result)
-})
-
-
-app.get('/login',(req,res)=>{
-    let {id,pw} = req.query; 
-
-    if(id=='root' && pw=='root'){
-        // 토큰 생성
-        let ctoken = token();
-        res.cookie('token',ctoken,{httpOnly:true,secure:true,});
-        res.redirect('/?msg=로그인성공');
-    } else {
-        // 토큰 실패
-        res.redirect('/?msg=로그인실패');
-    }
-
 })
 
 app.listen(3000,()=>{
