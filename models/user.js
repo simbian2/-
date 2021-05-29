@@ -3,6 +3,10 @@ const Sequelize = require('sequelize'); // class
 class User1 extends Sequelize.Model{
     static init(sequelize){
         return super.init({
+            id:{
+                type:Sequelize.INTEGER(30),
+                primaryKey:true,
+            },
             userid:{
                 type:Sequelize.STRING(30),
             },

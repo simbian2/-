@@ -42,25 +42,29 @@ app.post('/auth/local/login', async (req,res)=>{
         where:{ userid:userid, userpw:userpw }
     }) 
 
-    if(flag != undefined){
-        // 로그인 성공
-        result = {
-            result:true,
-            msg:'로그인에 성공하셨습니다.'
+    try{
+        if(flag != undefined){
+            // 로그인 성공
+            result = {
+                result:true,
+                msg:'로그인에 성공하셨습니다.'
+            }
+    
+            let token = ctoken(userid);
+            res.cookie('AccessToken',token,{httpOnly:true,secure:true,})
+    
+            //token 내용을 
+        } else {
+            // 로그인 실패
+            result = {
+                result:false,
+                msg:'아이디와 패스워드를 확인해주세요.'
+            }
         }
-
-        let token = ctoken(userid);
-        res.cookie('AccessToken',token,{httpOnly:true,secure:true,})
-
-        //token 내용을 
-    } else {
-        // 로그인 실패
-        result = {
-            result:false,
-            msg:'아이디와 패스워드를 확인해주세요.'
-        }
+        res.json(result)
+    }catch(err){
+        res.json(err.data)
     }
-    res.json(result)
 })
 
 app.listen(3000,()=>{
