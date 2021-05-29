@@ -17,13 +17,15 @@ app.use(bodyParser.urlencoded({extended:false,}))
 app.use(cookieParser());
 app.use(express.static('public'));
 
-app.get('/',(req,res)=>{ // main페이지
-    let {msg} = req.query;             
-    res.render('index')
+app.get('/',(req,res)=>{ // main페이지          
+    res.render('index',{
+        msg:req.query.msg,
+    })
   
 });
 
 app.get('/user/info',auth,(req,res)=>{
+    //res.clearCookie('AccessToken');
     res.send(`Hello ${req.userid}`);
 })
 
