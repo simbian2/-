@@ -4,8 +4,9 @@ const bodyParser = require('body-parser'); // npm install body-parser
 const app = express();
 const nunjucks = require('nunjucks');
 const ctoken = require('./jwt');
+const cuserpw = require('./pw');
 const auth = require('./middleware/auth');
-const {User} = require('../jwt/models/index')
+const {sequelize,User} = require('./models/index')
 
 app.set('view engine','html');
 nunjucks.configure('views',{
@@ -16,6 +17,15 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended:false,}))
 app.use(cookieParser());
 app.use(express.static('public'));
+
+sequelize.sync({force:false})
+.then(()=>{ // resolve
+    console.log('DB접속이 완료되었습니다.')
+})
+.catch((err)=>{ // reject
+    console.log(err)
+})
+
 
 app.get('/',(req,res)=>{ // main페이지          
     res.render('index',{
@@ -28,6 +38,26 @@ app.get('/user/info',auth,(req,res)=>{
     //res.clearCookie('AccessToken');
     res.send(`Hello ${req.userid}`);
 })
+app.get('/user/join',auth,(req,res)=>{
+    //res.clearCookie('AccessToken');
+    res.render('join')
+})
+
+app.post('/user/join', async (req,res)=>{
+    let userid = req.body.userid
+    let userpw = req.body.userpw
+
+    let cuserpw = cuserpw(userpw);
+
+    await User.create({
+        userid: userid,
+        userpw: cuserpw,
+    })
+
+    //res.clearCookie('AccessToken');
+    res.redirect('/')
+})
+
 
 app.get('/menu1',(req,res)=>{ //sub 페이지 
     res.send('menu1페이지입니다.');
@@ -69,6 +99,6 @@ app.post('/auth/local/login', async (req,res)=>{
     }
 })
 
-app.listen(3000,()=>{
+app.listen(5000,()=>{
     console.log('server start port 3000!');
 });

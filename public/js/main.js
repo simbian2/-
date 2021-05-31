@@ -36,7 +36,7 @@ async function login(){
     } 
 
     // POST auth/local/logi
-    let url = 'http://localhost:3000/auth/local/login';
+    let url = 'http://localhost:5000/auth/local/login';
     /*
     let options = {
         method:'POST',
@@ -65,13 +65,18 @@ async function login(){
     let {result,msg} = json;
 
     alert(msg);
-    if(result){
-        // 로그인이 성공됬을때
-        let layerPopup = document.querySelector('.layerPopup');
-        layerPopup.classList.remove('open')
-    } else {
-        userid.value = '';
-        userpw.value = '';
-        userid.focus();
+    try{
+        if(result){
+            // 로그인이 성공됬을때
+            let layerPopup = document.querySelector('.layerPopup');
+            layerPopup.classList.remove('open')
+        } else {
+            userid.value = '';
+            userpw.value = '';
+            userid.focus();
+        }
+    }catch(err){
+        res.json(err.data)
     }
+
 }
