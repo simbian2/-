@@ -9,13 +9,13 @@ function cuserpw(userpw){
     .replace('=','')
 
     //userpw를 암호화
-    const cuserpw = crypto.createHmac('sha256',Buffer.from(process.env.salt))
+    const encodecuserpw = crypto.createHmac('sha256',Buffer.from(process.env.salt))
     .update(ORiginuserpw)
     .digest('base64')
     .replace('==','')
     .replace('=','')
 
-    let Origincuserpw = cuserpw
+    let Origincuserpw = `${encodecuserpw}`
     
     return Origincuserpw;
 }
