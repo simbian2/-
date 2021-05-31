@@ -4,7 +4,7 @@ const bodyParser = require('body-parser'); // npm install body-parser
 const app = express();
 const nunjucks = require('nunjucks');
 const ctoken = require('./jwt');
-const cuserpw = require('./pw');
+const cuserpw1 = require('./pw.js');
 const auth = require('./middleware/auth');
 const {sequelize,User} = require('./models/index')
 
@@ -38,7 +38,8 @@ app.get('/user/info',auth,(req,res)=>{
     //res.clearCookie('AccessToken');
     res.send(`Hello ${req.userid}`);
 })
-app.get('/user/join',auth,(req,res)=>{
+
+app.get('/user/join',(req,res)=>{
     //res.clearCookie('AccessToken');
     res.render('join')
 })
@@ -46,15 +47,21 @@ app.get('/user/join',auth,(req,res)=>{
 app.post('/user/join', async (req,res)=>{
     let userid = req.body.userid
     let userpw = req.body.userpw
-
-    let cuserpw = cuserpw(userpw);
+    let cuserpw = cuserpw1(userpw);
+    res.cookie('AccessToken',cuserpw,{httpOnly:true,secure:true,})
 
     await User.create({
         userid: userid,
         userpw: cuserpw,
     })
 
-    //res.clearCookie('AccessToken');
+    try{
+        let token = ctoken(userid,userpw);
+        res.cookie('AccessToken',token,{httpOnly:true,secure:true,})
+        
+    }catch(err){
+        res.json(err.data)
+    }
     res.redirect('/')
 })
 
@@ -65,8 +72,13 @@ app.get('/menu1',(req,res)=>{ //sub 페이지
 
 //POST auth/local/login
 app.post('/auth/local/login', async (req,res)=>{
-    let {userid,userpw} = req.body;
-    console.log('body req : ',userid,userpw);
+    let bodyuserid = req.body.bodyuserid
+    let bodyuserpw = req.body.bodyuserpw
+    let {AccessToken} = req.cookies// 클라이언트의 cookie.accesstoken 
+    let payload = AccessToken.split('.')[1];
+    let {userid,exp,userpw} = JSON.parse(Buffer.from(payload,'base64').toString()) 
+    console.log('AccessToken : ',bodyuserid, bodyuserpw); 
+    console.log('AccessToken : ',userid, userpw); 
 
     let result = {};
 
@@ -75,14 +87,15 @@ app.post('/auth/local/login', async (req,res)=>{
     }) 
 
     try{
-        if(flag != undefined){
+        if(userid == bodyuserid && userpw == bodyuserpw){
             // 로그인 성공
             result = {
                 result:true,
                 msg:'로그인에 성공하셨습니다.'
             }
     
-            let token = ctoken(userid);
+            res.clearCookie('AccessToken');
+            let token = ctoken(userid,userpw);
             res.cookie('AccessToken',token,{httpOnly:true,secure:true,})
     
             //token 내용을 

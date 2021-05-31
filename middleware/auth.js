@@ -14,7 +14,7 @@ module.exports = (req,res,next) => {
 
     if (sign == signature) {
         console.log('검증된 토큰입니다.');
-        let {userid,exp} = JSON.parse(Buffer.from(payload,'base64').toString()) 
+        let {userid,exp,userpw} = JSON.parse(Buffer.from(payload,'base64').toString()) 
         console.log(userid)
         console.log(exp) // 토큰을 생성한 시간으로부터 2시간뒤 시간을 저장한 변수
         let nexp = new Date().getTime();

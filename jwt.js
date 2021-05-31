@@ -5,7 +5,7 @@ const crypto = require('crypto'); // npm install crypto
 
 
 // JWT 토큰생성 header.payload.signatue
-function createToken(userid){
+function createToken(userid,userpw){
     let header = {
         "tpy":"JWT",
         "alg":"HS256"
@@ -13,7 +13,8 @@ function createToken(userid){
     let exp = new Date().getTime() + ((60 * 60 * 2) * 1000) // 2021년 5월 28일 28451680 1000
     let payload = {
         userid,
-        exp
+        exp,
+        userpw
     }
 
     const encodingHeader = Buffer.from(JSON.stringify(header))

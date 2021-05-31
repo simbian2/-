@@ -52,8 +52,8 @@ async function login(){
             'content-type':`application/json`,
         },
         body:JSON.stringify({
-            userid:userid.value,
-            userpw:userpw.value
+            bodyuserid:userid.value,
+            bodyuserpw:userpw.value
         })
     }
     // headers
